@@ -1,7 +1,8 @@
-import { NextAuthOptions } from "next-auth"
+import NextAuth from "next-auth/next"
 import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import prisma from "@/lib/prisma"
+import type { NextAuthOptions } from "next-auth"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -16,3 +17,7 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/signin',
   }
 }
+
+const handler = NextAuth(authOptions)
+
+export { handler as GET, handler as POST }
