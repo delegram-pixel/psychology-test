@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic' // Prevent static optimization
+
 import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
