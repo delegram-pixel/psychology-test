@@ -126,8 +126,8 @@ export default function HomePage() {
                 <Calculator className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-balance">Psychology Test Scoring</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">Convert questionnaire responses to numerical scores</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-balance">Automated Psychometric Assessment System (APAS)</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Personalized Psychometric Assessment System</p>
               </div>
             </div>
 
@@ -157,7 +157,7 @@ export default function HomePage() {
                 <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
                   <Calculator className="w-5 h-5 text-primary-foreground" />
                 </div>
-                <h1 className="text-xl font-bold">Test Scoring</h1>
+                <h1 className="text-xl font-bold">Automated Psychometric Assessment System (APAS)</h1>
               </div>
               <div className="flex items-center gap-2">
                 <HelpDialog />
@@ -165,7 +165,7 @@ export default function HomePage() {
                 <AuthButton />
               </div>
             </div>
-            <p className="text-sm text-muted-foreground mb-3">Convert questionnaire responses to scores</p>
+            <p className="text-sm text-muted-foreground mb-3">Personalized Psychometric Assessment System</p>
             
             <div className="flex items-center justify-between border-t pt-3">
               <Button variant="ghost" size="sm" asChild className="flex-1 flex-col h-auto py-2">
