@@ -7,7 +7,7 @@ export const SCALES: Scale[] = [
     description: "A 21-item self-report measure of depression severity",
     totalItems: 21,
     scoringType: "sum",
-    responseFormat: "numeric",
+    responseFormat: "text",
     minScore: 0,
     maxScore: 63,
     expectedRange: "0-3",
@@ -531,6 +531,243 @@ export const SCALE_ITEMS: ScaleItem[] = [
 ]
 
 export const RESPONSE_MAPPINGS: ResponseMapping[] = [
+  // BDI-II Responses (0-3 scale)
+  {
+    id: "bdi-0",
+    scaleItemId: "bdi-1",
+    textResponse: "I do not feel sad",
+    numericValue: 0,
+    aliases: ["i do not feel sad", "not sad", "0", "no sadness"],
+  },
+  {
+    id: "bdi-1",
+    scaleItemId: "bdi-1",
+    textResponse: "I feel sad much of the time",
+    numericValue: 1,
+    aliases: ["i feel sad much of the time", "sad sometimes", "1", "occasionally sad"],
+  },
+  {
+    id: "bdi-2",
+    scaleItemId: "bdi-1",
+    textResponse: "I am sad all the time",
+    numericValue: 2,
+    aliases: ["i am sad all the time", "sad often", "2", "frequently sad"],
+  },
+  {
+    id: "bdi-3",
+    scaleItemId: "bdi-1",
+    textResponse: "I am so sad or unhappy that I can't stand it",
+    numericValue: 3,
+    aliases: [
+      "i am so sad or unhappy that i can't stand it",
+      "extremely sad",
+      "3",
+      "unbearably sad",
+      "i am extremely sad and can't snap out of it",
+      "i can't stop feeling extremely sad",
+      "i am overwhelmingly sad all the time",
+      "i am completely overcome with sadness",
+      "my sadness is unbearable"
+    ],
+  },
+  
+  // BDI-II Response patterns for all items
+  // Item 1: Sadness (already defined above)
+  
+  // Item 2: Pessimism
+  {
+    id: "bdi-2-0",
+    scaleItemId: "bdi-2",
+    textResponse: "I am not particularly discouraged about the future",
+    numericValue: 0,
+    aliases: ["not discouraged", "0", "optimistic", "positive"],
+  },
+  {
+    id: "bdi-2-1",
+    scaleItemId: "bdi-2",
+    textResponse: "I feel discouraged about the future",
+    numericValue: 1,
+    aliases: ["somewhat discouraged", "1", "slightly negative"],
+  },
+  {
+    id: "bdi-2-2",
+    scaleItemId: "bdi-2",
+    textResponse: "I feel I have nothing to look forward to",
+    numericValue: 2,
+    aliases: ["nothing to look forward to", "2", "very discouraged"],
+  },
+  {
+    id: "bdi-2-3",
+    scaleItemId: "bdi-2",
+    textResponse: "I feel the future is hopeless and that things cannot improve",
+    numericValue: 3,
+    aliases: [
+      "hopeless",
+      "3",
+      "no hope for improvement",
+      "i feel the future is hopeless",
+      "i feel i have no future and things will never improve",
+      "things will never get better",
+      "i am certain the future holds nothing but suffering",
+      "the future is nothing but pain and suffering",
+      "i see no positive future ahead"
+    ],
+  },
+  
+  // Item 3: Past Failure
+  {
+    id: "bdi-3-0",
+    scaleItemId: "bdi-3",
+    textResponse: "I do not feel like a failure",
+    numericValue: 0,
+    aliases: ["not a failure", "0", "successful"],
+  },
+  {
+    id: "bdi-3-1",
+    scaleItemId: "bdi-3",
+    textResponse: "I feel I have failed more than the average person",
+    numericValue: 1,
+    aliases: ["some failure", "1", "more failure than most"],
+  },
+  {
+    id: "bdi-3-2",
+    scaleItemId: "bdi-3",
+    textResponse: "As I look back on my life, all I can see is many failures",
+    numericValue: 2,
+    aliases: ["many failures", "2", "mostly failures"],
+  },
+  {
+    id: "bdi-3-3",
+    scaleItemId: "bdi-3",
+    textResponse: "I feel I am a complete failure as a person",
+    numericValue: 3,
+    aliases: [
+      "complete failure",
+      "3",
+      "total failure",
+      "i feel like a complete failure",
+      "i am a complete failure",
+      "i feel i am worthless and a total failure",
+      "i am worthless and a failure",
+      "i believe i am a complete and utter failure",
+      "i am a total and complete failure in every way",
+      "i am an absolute failure at everything"
+    ],
+  },
+  
+  // Item 4: Loss of Pleasure
+  {
+    id: "bdi-4-0",
+    scaleItemId: "bdi-4",
+    textResponse: "I get as much satisfaction out of things as I used to",
+    numericValue: 0,
+    aliases: ["satisfaction as usual", "0", "normal pleasure"],
+  },
+  {
+    id: "bdi-4-1",
+    scaleItemId: "bdi-4",
+    textResponse: "I don't enjoy things the way I used to",
+    numericValue: 1,
+    aliases: ["less enjoyment", "1", "reduced pleasure"],
+  },
+  {
+    id: "bdi-4-2",
+    scaleItemId: "bdi-4",
+    textResponse: "I get little satisfaction from anything",
+    numericValue: 2,
+    aliases: ["little satisfaction", "2", "minimal pleasure", "i get very little satisfaction from things anymore"],
+  },
+  {
+    id: "bdi-4-3",
+    scaleItemId: "bdi-4",
+    textResponse: "I am dissatisfied or bored with everything",
+    numericValue: 3,
+    aliases: [
+      "no satisfaction",
+      "3",
+      "no pleasure",
+      "i have lost all pleasure in things",
+      "nothing brings me pleasure anymore",
+      "i find no joy in anything",
+      "nothing gives me satisfaction anymore",
+      "i get no satisfaction from anything at all",
+      "there is no pleasure left in my life"
+    ],
+  },
+  
+  // Item 5: Guilty Feelings
+  {
+    id: "bdi-5-0",
+    scaleItemId: "bdi-5",
+    textResponse: "I don't feel particularly guilty",
+    numericValue: 0,
+    aliases: ["not guilty", "0", "no guilt"],
+  },
+  {
+    id: "bdi-5-1",
+    scaleItemId: "bdi-5",
+    textResponse: "I feel guilty a good part of the time",
+    numericValue: 1,
+    aliases: ["some guilt", "1", "occasionally guilty"],
+  },
+  {
+    id: "bdi-5-2",
+    scaleItemId: "bdi-5",
+    textResponse: "I feel quite guilty most of the time",
+    numericValue: 2,
+    aliases: ["frequent guilt", "2", "often guilty", "i feel guilty most of the time", "i feel guilty often"],
+  },
+  {
+    id: "bdi-5-3",
+    scaleItemId: "bdi-5",
+    textResponse: "I feel guilty all of the time",
+    numericValue: 3,
+    aliases: [
+      "constant guilt",
+      "3",
+      "always guilty",
+      "i feel guilty all the time",
+      "i am constantly feeling guilty",
+      "guilt never leaves me",
+      "i am consumed by guilt constantly",
+      "i am overwhelmed with guilt all the time",
+      "guilt dominates my every thought"
+    ],
+  },
+  
+  // Generic response pattern for remaining items (6-21)
+  // These items follow a similar 0-3 scale pattern
+  ...Array.from({ length: 16 }, (_, i) => i + 6).flatMap(itemNum => [
+    {
+      id: `bdi-${itemNum}-0`,
+      scaleItemId: `bdi-${itemNum}`,
+      textResponse: "not at all",
+      numericValue: 0,
+      aliases: ["not at all", "never", "0", "none", "no", "does not apply", "rarely"],
+    },
+    {
+      id: `bdi-${itemNum}-1`,
+      scaleItemId: `bdi-${itemNum}`,
+      textResponse: "slightly",
+      numericValue: 1,
+      aliases: ["mildly", "slightly", "1", "a little", "somewhat", "sometimes", "occasionally"],
+    },
+    {
+      id: `bdi-${itemNum}-2`,
+      scaleItemId: `bdi-${itemNum}`,
+      textResponse: "2",
+      numericValue: 2,
+      aliases: ["moderately", "2", "some", "fairly often"],
+    },
+    {
+      id: `bdi-${itemNum}-3`,
+      scaleItemId: `bdi-${itemNum}`,
+      textResponse: "3",
+      numericValue: 3,
+      aliases: ["severely", "3", "very much", "extremely", "a lot", "all the time"],
+    }
+  ]).flat(),
+  
   // GAD-7 and PHQ-9 Likert responses (0-3 scale)
   {
     id: "likert-0",

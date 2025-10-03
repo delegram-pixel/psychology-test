@@ -42,15 +42,17 @@ export class ScoringEngine {
 
       // Process each response based on detected format
       scaleItems.forEach((item) => {
+        // Check each possible key, using nullish coalescing to handle 0 values correctly
         const responseText =
-          participant.responses[`item_${item.itemNumber}`] ||
-          participant.responses[item.itemNumber.toString()] ||
-          participant.responses[`q${item.itemNumber}`] ||
-          participant.responses[`Q${item.itemNumber}`] ||
-          participant.responses[`Item${item.itemNumber}`] ||
+          participant.responses[`item_${item.itemNumber}`] ??
+          participant.responses[item.itemNumber.toString()] ??
+          participant.responses[`q${item.itemNumber}`] ??
+          participant.responses[`Q${item.itemNumber}`] ??
+          participant.responses[`Item${item.itemNumber}`] ??
           participant.responses[`item${item.itemNumber}`]
 
-        if (!responseText || responseText.trim() === "") {
+        // Check if responseText is null, undefined, or an empty string after trimming
+        if (responseText === null || responseText === undefined || responseText.toString().trim() === "") {
           processingErrors.push(`Missing response for item ${item.itemNumber}`)
           return
         }
