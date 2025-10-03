@@ -118,38 +118,69 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
+          {/* Desktop Header */}
+          <div className="hidden sm:flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
+              <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
                 <Calculator className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-balance">Psychology Test Scoring Platform</h1>
-                <p className="text-muted-foreground">Convert questionnaire responses to numerical scores</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-balance">Psychology Test Scoring</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Convert questionnaire responses to numerical scores</p>
               </div>
             </div>
 
-
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
                 <Link href="/sessions" className="gap-2">
                   <Clock className="w-4 h-4" />
-                  My Sessions
+                  <span className="hidden sm:inline">Sessions</span>
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
                 <Link href="/scales" className="gap-2">
                   <BookOpen className="w-4 h-4" />
-                  Scale Library
+                  <span className="hidden sm:inline">Scales</span>
                 </Link>
               </Button>
               <HelpDialog />
               <ThemeToggle />
               <AuthButton />
             </div>
+          </div>
 
-
+          {/* Mobile Header */}
+          <div className="sm:hidden">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
+                  <Calculator className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <h1 className="text-xl font-bold">Test Scoring</h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <HelpDialog />
+                <ThemeToggle />
+                <AuthButton />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">Convert questionnaire responses to scores</p>
+            
+            <div className="flex items-center justify-between border-t pt-3">
+              <Button variant="ghost" size="sm" asChild className="flex-1 flex-col h-auto py-2">
+                <Link href="/sessions" className="flex flex-col items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-xs">Sessions</span>
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild className="flex-1 flex-col h-auto py-2">
+                <Link href="/scales" className="flex flex-col items-center gap-1">
+                  <BookOpen className="w-4 h-4" />
+                  <span className="text-xs">Scales</span>
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
