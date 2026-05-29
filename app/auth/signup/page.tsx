@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -19,7 +18,6 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 export default function SignupPage() {
-  const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
 
@@ -39,7 +37,7 @@ export default function SignupPage() {
       setServerError(json.error)
       return
     }
-    setVerifyUrl(json.verifyUrl)
+    setVerifyUrl(json.verifyUrl ?? 'sent')
   }
 
   if (verifyUrl) {
@@ -53,7 +51,12 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <a href={verifyUrl} className="text-indigo-600 underline text-sm break-all">{verifyUrl}</a>
+            {verifyUrl !== 'sent' && (
+              <a href={verifyUrl} className="text-indigo-600 underline text-sm break-all">{verifyUrl}</a>
+            )}
+            {verifyUrl === 'sent' && (
+              <p className="text-sm text-slate-500">Check your inbox for the verification link.</p>
+            )}
           </CardContent>
         </Card>
       </div>

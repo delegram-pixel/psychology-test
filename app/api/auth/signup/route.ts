@@ -20,26 +20,29 @@ export async function POST(req: NextRequest) {
 
   const { name, email, password } = parsed.data
 
+  // Hash first to prevent timing oracle — response time must be consistent
+  const passwordHash = await hashPassword(password)
+
   const existing = await prisma.user.findUnique({ where: { email } })
   if (existing) {
-    return NextResponse.json({ error: 'Email already registered' }, { status: 409 })
+    // Return same response as success — don't leak whether email exists
+    return NextResponse.json(
+      { message: 'If this email is not registered, a verification link has been sent.' },
+      { status: 201 }
+    )
   }
 
-  const passwordHash = await hashPassword(password)
   const verificationToken = generateToken()
-  const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
+  const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
   await prisma.user.create({
-    data: {
-      name,
-      email,
-      passwordHash,
-      verificationToken,
-      verificationTokenExpiry,
-    },
+    data: { name, email, passwordHash, verificationToken, verificationTokenExpiry },
   })
 
   const verifyUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${verificationToken}`
 
-  return NextResponse.json({ message: 'Account created. Please verify your email.', verifyUrl }, { status: 201 })
+  return NextResponse.json(
+    { message: 'If this email is not registered, a verification link has been sent.', verifyUrl },
+    { status: 201 }
+  )
 }
