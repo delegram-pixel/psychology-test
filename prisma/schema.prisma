@@ -7,21 +7,22 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+// ── NextAuth required models ──────────────────────────────────────────────────
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -34,17 +35,6 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  uploadSessions UploadSession[]
-}
-
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -53,28 +43,67 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model UploadSession {
-  id                 String   @id @default(cuid())
-  fileName           String
-  uploadedAt         DateTime @default(now())
-  totalResponses     Int
-  processedResponses Int
-  selectedScaleId    String
-  status             String
-  userId             String
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  results            ProcessedResult[]
+// ── Application models ────────────────────────────────────────────────────────
+
+model User {
+  id                      String              @id @default(cuid())
+  name                    String?
+  email                   String?             @unique
+  emailVerified           DateTime?
+  image                   String?
+  passwordHash            String?
+  verificationToken       String?             @unique
+  verificationTokenExpiry DateTime?
+  accounts                Account[]
+  sessions                Session[]
+  patients                Patient[]
+  assessmentSessions      AssessmentSession[]
 }
 
-model ProcessedResult {
-  id              String   @id @default(cuid())
-  sessionId       String
-  participantId   String
-  responsesJson   Json
-  scoresJson      Json
-  totalScore      Float
-  interpretation  String
-  severity        String
-  processingErrorsJson Json
-  uploadSession   UploadSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+model Patient {
+  id                 String              @id @default(cuid())
+  displayName        String
+  anonymousId        String
+  psychologistId     String
+  psychologist       User                @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  assessmentSessions AssessmentSession[]
+  createdAt          DateTime            @default(now())
+
+  @@unique([anonymousId, psychologistId])
+}
+
+model AssessmentSession {
+  id             String                 @id @default(cuid())
+  patientId      String
+  patient        Patient                @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId String
+  psychologist   User                   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  scale          Scale
+  status         SessionStatus          @default(PENDING)
+  token          String                 @unique
+  tokenExpiresAt DateTime
+  response       QuestionnaireResponse?
+  createdAt      DateTime               @default(now())
+}
+
+model QuestionnaireResponse {
+  id          String            @id @default(cuid())
+  sessionId   String            @unique
+  session     AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  itemScores  Json
+  totalScore  Int
+  severity    String
+  completedAt DateTime          @default(now())
+}
+
+enum Scale {
+  PHQ9
+  BDI2
+  GAD7
+}
+
+enum SessionStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
 }
