@@ -7,7 +7,9 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -42,6 +44,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@vercel/analytics": "latest",
     "autoprefixer": "^10.4.20",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
@@ -69,15 +72,20 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-is": "^19",
     "eslint": "^8.57.1",
     "eslint-config-next": "15.5.4",
+    "jest": "^30.4.2",
+    "jest-environment-node": "^30.4.1",
     "postcss": "^8.5",
     "prisma": "5.22.0",
     "tailwindcss": "^4.1.9",
+    "ts-jest": "^29.4.11",
     "tw-animate-css": "1.3.3",
     "typescript": "^5"
   }
