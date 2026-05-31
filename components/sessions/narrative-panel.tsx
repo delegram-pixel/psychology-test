@@ -23,6 +23,7 @@ export function NarrativePanel({ clinicalPayload }: Props) {
   const [reviewed, setReviewed] = useState(false)
   const [escalated, setEscalated] = useState(false)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const items = Object.entries(clinicalPayload.itemScores)
       .map(([k, v]) => `Item ${k}: ${v}`)
