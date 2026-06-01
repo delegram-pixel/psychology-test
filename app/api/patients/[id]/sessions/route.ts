@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { generateToken, tokenExpiresAt } from '@/lib/token'
 
 const CreateSessionSchema = z.object({
-  scale: z.enum(['PHQ9', 'BDI2', 'GAD7']),
+  scaleId: z.string().min(1),
 })
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     data: {
       patientId: params.id,
       psychologistId: session.user.id,
-      scale: parsed.data.scale,
+      scaleId: parsed.data.scaleId,
       token,
       tokenExpiresAt: tokenExpiresAt(),
     },

@@ -1,28 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { isTokenExpired } from '@/lib/token'
-import { computeAlerts } from '@/lib/alert-rules'
+import { computeNumericScore, lookupSeverity } from '@/lib/scale-scoring'
 import { z } from 'zod'
 
 export async function GET(req: NextRequest, { params }: { params: { token: string } }) {
-  const session = await prisma.assessmentSession.findUnique({
+  const assessmentSession = await prisma.assessmentSession.findUnique({
     where: { token: params.token },
+    include: {
+      scale: {
+        include: {
+          items: {
+            orderBy: { order: 'asc' },
+            include: { options: { orderBy: { order: 'asc' } } },
+          },
+          thresholds: { orderBy: { minScore: 'asc' } },
+        },
+      },
+    },
   })
 
-  if (!session) return NextResponse.json({ error: 'Invalid link' }, { status: 404 })
-  if (session.status !== 'PENDING') return NextResponse.json({ error: 'Link already used' }, { status: 410 })
-  if (isTokenExpired(session.tokenExpiresAt)) return NextResponse.json({ error: 'Link expired' }, { status: 410 })
+  if (!assessmentSession) return NextResponse.json({ error: 'Invalid link' }, { status: 404 })
+  if (assessmentSession.status !== 'PENDING') return NextResponse.json({ error: 'Link already used' }, { status: 410 })
+  if (isTokenExpired(assessmentSession.tokenExpiresAt)) return NextResponse.json({ error: 'Link expired' }, { status: 410 })
 
-  return NextResponse.json({ scale: session.scale, sessionId: session.id })
+  return NextResponse.json({
+    scale: assessmentSession.scale,
+    sessionId: assessmentSession.id,
+  })
 }
 
 const SubmitSchema = z.object({
-  itemScores: z.record(z.string(), z.number()),
+  itemScores: z.record(z.string(), z.union([z.number(), z.string()])),
 })
 
 export async function POST(req: NextRequest, { params }: { params: { token: string } }) {
   const assessmentSession = await prisma.assessmentSession.findUnique({
     where: { token: params.token },
+    include: {
+      scale: { include: { thresholds: { orderBy: { minScore: 'asc' } } } },
+    },
   })
 
   if (!assessmentSession) return NextResponse.json({ error: 'Invalid link' }, { status: 404 })
@@ -34,17 +51,12 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
 
   const { itemScores } = parsed.data
-  const totalScore = Object.values(itemScores).reduce((a, b) => a + b, 0)
-  const { severity } = computeAlerts(assessmentSession.scale as 'PHQ9' | 'BDI2' | 'GAD7', totalScore, itemScores)
+  const totalScore = computeNumericScore(itemScores)
+  const severity = lookupSeverity(totalScore, assessmentSession.scale.thresholds)
 
   await prisma.$transaction([
     prisma.questionnaireResponse.create({
-      data: {
-        sessionId: assessmentSession.id,
-        itemScores,
-        totalScore,
-        severity: severity ?? 'low',
-      },
+      data: { sessionId: assessmentSession.id, itemScores, totalScore, severity },
     }),
     prisma.assessmentSession.update({
       where: { id: assessmentSession.id },
