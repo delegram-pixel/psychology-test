@@ -58,6 +58,49 @@ model User {
   sessions                Session[]
   patients                Patient[]
   assessmentSessions      AssessmentSession[]
+  scales                  Scale[]
+}
+
+model Scale {
+  id                 String              @id @default(cuid())
+  name               String
+  description        String?
+  psychologistId     String?
+  isLibrary          Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  psychologist       User?               @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  items              ScaleItem[]
+  thresholds         SeverityThreshold[]
+  assessmentSessions AssessmentSession[]
+}
+
+model ScaleItem {
+  id       String           @id @default(cuid())
+  scaleId  String
+  scale    Scale            @relation(fields: [scaleId], references: [id], onDelete: Cascade)
+  order    Int
+  text     String
+  type     ItemType
+  required Boolean          @default(true)
+  options  ResponseOption[]
+}
+
+model ResponseOption {
+  id     String    @id @default(cuid())
+  itemId String
+  item   ScaleItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  label  String
+  value  Int?
+  order  Int
+}
+
+model SeverityThreshold {
+  id       String @id @default(cuid())
+  scaleId  String
+  scale    Scale  @relation(fields: [scaleId], references: [id], onDelete: Cascade)
+  label    String
+  minScore Int
+  maxScore Int
 }
 
 model Patient {
@@ -78,7 +121,8 @@ model AssessmentSession {
   patient        Patient                @relation(fields: [patientId], references: [id], onDelete: Cascade)
   psychologistId String
   psychologist   User                   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
-  scale          Scale
+  scaleId        String
+  scale          Scale             @relation(fields: [scaleId], references: [id])
   status         SessionStatus          @default(PENDING)
   token          String                 @unique
   tokenExpiresAt DateTime
@@ -96,10 +140,11 @@ model QuestionnaireResponse {
   completedAt DateTime          @default(now())
 }
 
-enum Scale {
-  PHQ9
-  BDI2
-  GAD7
+enum ItemType {
+  MULTIPLE_CHOICE
+  YES_NO
+  FREE_TEXT
+  NUMBER
 }
 
 enum SessionStatus {
