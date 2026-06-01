@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
 import { hashPassword } from '@/lib/password'
-import { generateToken } from '@/lib/token'
 
 const SignupSchema = z.object({
   name: z.string().min(2),
@@ -32,17 +31,9 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const verificationToken = generateToken()
-  const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000)
-
   await prisma.user.create({
-    data: { name, email, passwordHash, verificationToken, verificationTokenExpiry },
+    data: { name, email, passwordHash, emailVerified: new Date() },
   })
 
-  const verifyUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${verificationToken}`
-
-  return NextResponse.json(
-    { message: 'If this email is not registered, a verification link has been sent.', verifyUrl },
-    { status: 201 }
-  )
+  return NextResponse.json({ message: 'Account created.' }, { status: 201 })
 }

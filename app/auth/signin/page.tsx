@@ -12,19 +12,20 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+  email: z.string().email('Invalid email'),
+  password: z.string().min(1, 'Password is required'),
 })
 type FormData = z.infer<typeof schema>
 
 export default function SigninPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const verified = searchParams.get('verified') === '1'
+  const registered = searchParams.get('registered') === '1'
   const [error, setError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: { email: '', password: '' },
   })
 
   async function onSubmit(data: FormData) {
@@ -34,10 +35,6 @@ export default function SigninPage() {
       password: data.password,
       redirect: false,
     })
-    if (result?.error === 'EMAIL_NOT_VERIFIED') {
-      setError('Please verify your email before signing in.')
-      return
-    }
     if (result?.error) {
       setError('Invalid email or password.')
       return
@@ -51,7 +48,7 @@ export default function SigninPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Sign in to APAS</CardTitle>
           <CardDescription>
-            {verified ? '✓ Email verified. You can now sign in.' : 'Enter your credentials to access your dashboard'}
+            {registered ? '✓ Account created. Sign in below.' : 'Enter your credentials to continue'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,6 +61,7 @@ export default function SigninPage() {
             <div className="space-y-1">
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" {...register('password')} />
+              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
             <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={isSubmitting}>
