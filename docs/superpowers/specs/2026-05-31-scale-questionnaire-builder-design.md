@@ -231,3 +231,4 @@ The existing `computeAlerts()` function uses hardcoded thresholds for PHQ9/BDI2/
 - **Scores only from numeric items** — FREE_TEXT answers are stored but excluded from `totalScore`
 - **Threshold lookup is range-based** — if no threshold matches the score, severity = "unclassified"
 - **Scale deletion is blocked** if sessions reference it — return 409 with a clear message
+
