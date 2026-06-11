@@ -4,12 +4,6 @@ import { isTokenExpired } from '@/lib/token'
 import { computeNumericScore, lookupSeverity } from '@/lib/scale-scoring'
 import { z } from 'zod'
 
-const SCALE_NAME_TO_ENUM: Record<string, string> = {
-  'PHQ-9': 'PHQ9',
-  'BDI-II': 'BDI2',
-  'GAD-7': 'GAD7',
-}
-
 export async function GET(req: NextRequest, { params }: { params: { token: string } }) {
   const assessmentSession = await prisma.assessmentSession.findUnique({
     where: { token: params.token },

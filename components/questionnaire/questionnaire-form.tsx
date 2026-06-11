@@ -5,36 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-<<<<<<< HEAD
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
-
-interface ResponseOption {
-  id: string
-  label: string
-  value: number | null
-  order: number
-}
-
-interface ScaleItem {
-  id: string
-  order: number
-  text: string
-  type: 'MULTIPLE_CHOICE' | 'YES_NO' | 'FREE_TEXT' | 'NUMBER'
-  required: boolean
-  options: ResponseOption[]
-}
-
-interface Scale {
-  id: string
-  name: string
-  items: ScaleItem[]
-}
-
-interface Props {
-  scale: Scale
-  token: string
-=======
 import { Input } from '@/components/ui/input'
 
 // ── Hardcoded items for the 3 standard library scales ────────────────────────
@@ -101,7 +71,6 @@ interface DbItem {
   text: string
   type: string
   options: { label: string; value: number | null }[]
->>>>>>> 8dcac93 (revamp to overwatch system)
 }
 
 interface NormalisedItem {
@@ -122,24 +91,10 @@ interface Props {
 
 export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
   const router = useRouter()
-<<<<<<< HEAD
-  const [answers, setAnswers] = useState<Record<string, number | string>>({})
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const allRequired = scale.items
-    .filter(i => i.required)
-    .every(i => answers[i.id] !== undefined && answers[i.id] !== '')
-
-  function setAnswer(itemId: string, value: number | string) {
-    setAnswers(prev => ({ ...prev, [itemId]: value }))
-  }
-=======
   const [answers, setAnswers] = useState<Record<number, number | string>>({})
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Use DB items for custom scales; fall back to hardcoded for library scales
   const items: NormalisedItem[] = (dbItems && dbItems.length > 0)
     ? dbItems.map(item => ({
         number: item.order,
@@ -152,18 +107,10 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
     : (HARDCODED_ITEMS[scale] ?? [])
 
   const allAnswered = items.every(item => answers[item.number] !== undefined && answers[item.number] !== '')
->>>>>>> 8dcac93 (revamp to overwatch system)
 
   async function onSubmit() {
     setSubmitting(true)
     setError(null)
-<<<<<<< HEAD
-
-    const itemScores: Record<string, number | string> = {}
-    scale.items.forEach(item => {
-      if (answers[item.id] !== undefined) {
-        itemScores[item.id] = answers[item.id]
-=======
     const itemScores: Record<string, number> = {}
     items.forEach(item => {
       const val = answers[item.number]
@@ -171,7 +118,6 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
         itemScores[String(item.number)] = 0
       } else {
         itemScores[String(item.number)] = Number(val)
->>>>>>> 8dcac93 (revamp to overwatch system)
       }
     })
 
@@ -192,40 +138,14 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
   const title = SCALE_LABELS[scale] ?? scaleName
 
   return (
-<<<<<<< HEAD
-    <div className="max-w-2xl mx-auto py-8 px-4 space-y-4">
-      <div className="pb-2 border-b border-slate-200">
-        <h1 className="text-lg font-semibold text-slate-900">{scale.name}</h1>
-        <p className="text-slate-500 text-sm mt-0.5">
-=======
     <div className="max-w-2xl mx-auto py-10 px-4 space-y-8">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
         <p className="text-slate-500 text-sm mt-1">
->>>>>>> 8dcac93 (revamp to overwatch system)
           Over the last 2 weeks, how often have you been bothered by the following?
         </p>
       </div>
 
-<<<<<<< HEAD
-      {scale.items.map((item, idx) => (
-        <div key={item.id} className="border border-slate-200 rounded-lg p-4 space-y-3 bg-white">
-          <p className="text-sm font-medium text-slate-800 leading-snug">
-            {idx + 1}. {item.text}
-            {item.required && <span className="text-red-400 ml-1">*</span>}
-          </p>
-
-          {item.type === 'MULTIPLE_CHOICE' && (
-            <RadioGroup
-              value={answers[item.id] !== undefined ? String(answers[item.id]) : ''}
-              onValueChange={val => setAnswer(item.id, Number(val))}
-              className="space-y-1"
-            >
-              {item.options.map(opt => (
-                <div key={opt.id} className="flex items-center gap-2">
-                  <RadioGroupItem value={String(opt.value)} id={`${item.id}-${opt.id}`} />
-                  <Label htmlFor={`${item.id}-${opt.id}`} className="text-sm text-slate-600 cursor-pointer font-normal">
-=======
       {items.length === 0 && (
         <p className="text-slate-400 text-sm">This scale has no questions configured yet.</p>
       )}
@@ -246,7 +166,6 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
                 <div key={opt.value} className="flex items-center gap-2">
                   <RadioGroupItem value={String(opt.value)} id={`item-${item.number}-${opt.value}`} />
                   <Label htmlFor={`item-${item.number}-${opt.value}`} className="text-sm text-slate-600 cursor-pointer">
->>>>>>> 8dcac93 (revamp to overwatch system)
                     {opt.label}
                   </Label>
                 </div>
@@ -254,42 +173,6 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
             </RadioGroup>
           )}
 
-<<<<<<< HEAD
-          {item.type === 'YES_NO' && (
-            <RadioGroup
-              value={answers[item.id] !== undefined ? String(answers[item.id]) : ''}
-              onValueChange={val => setAnswer(item.id, Number(val))}
-              className="flex gap-6"
-            >
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="1" id={`${item.id}-yes`} />
-                <Label htmlFor={`${item.id}-yes`} className="text-sm text-slate-600 cursor-pointer font-normal">Yes</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="0" id={`${item.id}-no`} />
-                <Label htmlFor={`${item.id}-no`} className="text-sm text-slate-600 cursor-pointer font-normal">No</Label>
-              </div>
-            </RadioGroup>
-          )}
-
-          {item.type === 'FREE_TEXT' && (
-            <Textarea
-              value={(answers[item.id] as string) ?? ''}
-              onChange={e => setAnswer(item.id, e.target.value)}
-              placeholder="Type your response…"
-              className="resize-none text-sm"
-              rows={3}
-            />
-          )}
-
-          {item.type === 'NUMBER' && (
-            <Input
-              type="number"
-              value={(answers[item.id] as number) ?? ''}
-              onChange={e => setAnswer(item.id, Number(e.target.value))}
-              className="w-32 text-sm"
-              placeholder="0"
-=======
           {item.type === 'NUMBER' && (
             <Input
               type="number"
@@ -305,7 +188,6 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
               rows={3}
               value={String(answers[item.number] ?? '')}
               onChange={e => setAnswers(prev => ({ ...prev, [item.number]: e.target.value }))}
->>>>>>> 8dcac93 (revamp to overwatch system)
             />
           )}
         </div>
@@ -313,15 +195,6 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
-<<<<<<< HEAD
-      <Button
-        onClick={onSubmit}
-        disabled={!allRequired || submitting}
-        className="w-full bg-indigo-600 hover:bg-indigo-700"
-      >
-        {submitting ? 'Submitting…' : 'Submit'}
-      </Button>
-=======
       {items.length > 0 && (
         <Button
           onClick={onSubmit}
@@ -331,7 +204,6 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
           {submitting ? 'Submitting…' : 'Submit'}
         </Button>
       )}
->>>>>>> 8dcac93 (revamp to overwatch system)
     </div>
   )
 }
