@@ -11,11 +11,15 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/auth/signin')
 
+  const SCALE_NAME_TO_ENUM: Record<string, string> = {
+    'PHQ-9': 'PHQ9', 'BDI-II': 'BDI2', 'GAD-7': 'GAD7',
+  }
+
   const patients = await prisma.patient.findMany({
     where: { psychologistId: session.user.id },
     include: {
       assessmentSessions: {
-        include: { response: true },
+        include: { response: true, scale: true },
         orderBy: { createdAt: 'asc' },
       },
     },
@@ -31,7 +35,8 @@ export default async function DashboardPage() {
   const alertCounts = completedSessions.reduce(
     (acc, s) => {
       const itemScores = s.response!.itemScores as Record<string, number>
-      const { severity } = computeAlerts(s.scale as 'PHQ9' | 'BDI2' | 'GAD7', s.response!.totalScore, itemScores)
+      const scaleEnum = (SCALE_NAME_TO_ENUM[s.scale.name] ?? s.scale.name) as 'PHQ9' | 'BDI2' | 'GAD7'
+      const { severity } = computeAlerts(scaleEnum, s.response!.totalScore, itemScores)
       if (severity === 'critical') acc.critical++
       if (severity) acc.open++
       return acc
@@ -89,7 +94,7 @@ export default async function DashboardPage() {
                 return (
                   <tr key={p.id}>
                     <td className="px-5 py-3 font-medium text-slate-800">{p.anonymousId}</td>
-                    <td className="px-5 py-3 text-slate-500">{latest?.scale ?? '—'}</td>
+                    <td className="px-5 py-3 text-slate-500">{latest?.scale?.name ?? '—'}</td>
                     <td className="px-5 py-3 text-slate-800">{latest?.response?.totalScore ?? '—'}</td>
                     <td className="px-5 py-3 text-slate-500">{completed.length}</td>
                     <td className="px-5 py-3">

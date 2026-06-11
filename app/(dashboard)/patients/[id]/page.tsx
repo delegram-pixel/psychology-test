@@ -5,17 +5,22 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { SessionChart } from '@/components/sessions/session-chart'
 import { NewSessionDialog } from '@/components/sessions/new-session-dialog'
+import { CopyLinkButton } from '@/components/sessions/copy-link-button'
 import { computeAlerts } from '@/lib/alert-rules'
 
 export default async function PatientProfilePage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/auth/signin')
 
+  const SCALE_NAME_TO_ENUM: Record<string, string> = {
+    'PHQ-9': 'PHQ9', 'BDI-II': 'BDI2', 'GAD-7': 'GAD7',
+  }
+
   const patient = await prisma.patient.findFirst({
     where: { id: params.id, psychologistId: session.user.id },
     include: {
       assessmentSessions: {
-        include: { response: true },
+        include: { response: true, scale: true },
         orderBy: { createdAt: 'asc' },
       },
     },
@@ -33,7 +38,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
 
   const latestAlerts = latest?.response
     ? computeAlerts(
-        latest.scale as 'PHQ9' | 'BDI2' | 'GAD7',
+        (SCALE_NAME_TO_ENUM[latest.scale.name] ?? latest.scale.name) as 'PHQ9' | 'BDI2' | 'GAD7',
         latest.response.totalScore,
         latest.response.itemScores as Record<string, number>
       )
@@ -65,8 +70,8 @@ export default async function PatientProfilePage({ params }: { params: { id: str
 
       {completed.length > 0 && (
         <div className="bg-white border border-slate-200 rounded-lg p-5">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Score History — {latest?.scale}</h2>
-          <SessionChart scale={latest!.scale} data={chartData} />
+          <h2 className="text-sm font-semibold text-slate-700 mb-4">Score History — {latest?.scale.name}</h2>
+          <SessionChart scale={SCALE_NAME_TO_ENUM[latest!.scale.name] ?? latest!.scale.name} data={chartData} />
         </div>
       )}
 
@@ -91,7 +96,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
               {patient.assessmentSessions.map((s, i) => (
                 <tr key={s.id} className="hover:bg-slate-50">
                   <td className="px-5 py-3 text-slate-500">{i + 1}</td>
-                  <td className="px-5 py-3 text-slate-700">{s.scale}</td>
+                  <td className="px-5 py-3 text-slate-700">{s.scale.name}</td>
                   <td className="px-5 py-3">
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       s.status === 'COMPLETED' ? 'bg-green-100 text-green-700'
@@ -102,14 +107,16 @@ export default async function PatientProfilePage({ params }: { params: { id: str
                   <td className="px-5 py-3 text-slate-800">{s.response?.totalScore ?? '—'}</td>
                   <td className="px-5 py-3 text-slate-500">{s.response?.severity ?? '—'}</td>
                   <td className="px-5 py-3">
-                    {s.status === 'COMPLETED' && (
+                    {s.status === 'COMPLETED' ? (
                       <Link
                         href={`/patients/${patient.id}/sessions/${s.id}`}
                         className="text-indigo-600 text-xs hover:underline"
                       >
                         View AI Summary →
                       </Link>
-                    )}
+                    ) : s.status === 'PENDING' ? (
+                      <CopyLinkButton token={s.token} />
+                    ) : null}
                   </td>
                 </tr>
               ))}

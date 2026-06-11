@@ -13,26 +13,31 @@ export default async function SessionDetailPage({
   const session = await getServerSession(authOptions)
   if (!session) redirect('/auth/signin')
 
+  const SCALE_NAME_TO_ENUM: Record<string, string> = {
+    'PHQ-9': 'PHQ9', 'BDI-II': 'BDI2', 'GAD-7': 'GAD7',
+  }
+
   const assessmentSession = await prisma.assessmentSession.findFirst({
     where: {
       id: params.sessionId,
       patientId: params.id,
       psychologistId: session.user.id,
     },
-    include: { response: true, patient: true },
+    include: { response: true, patient: true, scale: true },
   })
 
   if (!assessmentSession || !assessmentSession.response) notFound()
 
   const itemScores = assessmentSession.response.itemScores as Record<string, number>
+  const scaleEnum = (SCALE_NAME_TO_ENUM[assessmentSession.scale.name] ?? assessmentSession.scale.name) as 'PHQ9' | 'BDI2' | 'GAD7'
   const alerts = computeAlerts(
-    assessmentSession.scale as 'PHQ9' | 'BDI2' | 'GAD7',
+    scaleEnum,
     assessmentSession.response.totalScore,
     itemScores
   )
 
   const clinicalPayload = {
-    scale: assessmentSession.scale,
+    scale: scaleEnum,
     totalScore: assessmentSession.response.totalScore,
     severity: assessmentSession.response.severity,
     itemScores,
@@ -51,7 +56,7 @@ export default async function SessionDetailPage({
     <div className="space-y-6 max-w-3xl">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">
-          {assessmentSession.patient.anonymousId} — {assessmentSession.scale} Assessment
+          {assessmentSession.patient.anonymousId} — {assessmentSession.scale.name} Assessment
         </h1>
         <p className="text-slate-500 text-sm mt-1">
           Completed {new Date(assessmentSession.response.completedAt).toLocaleDateString()}

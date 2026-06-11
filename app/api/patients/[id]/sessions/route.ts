@@ -22,6 +22,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const parsed = CreateSessionSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
 
+  const scaleRecord = await prisma.scale.findFirst({
+    where: {
+      id: parsed.data.scaleId,
+      OR: [{ isLibrary: true }, { psychologistId: session.user.id }],
+    },
+  })
+  if (!scaleRecord) return NextResponse.json({ error: 'Scale not found' }, { status: 400 })
+
   const token = generateToken()
   const assessmentSession = await prisma.assessmentSession.create({
     data: {

@@ -1,13 +1,11 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// ── NextAuth required models ──────────────────────────────────────────────────
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 model Account {
   id                String  @id @default(cuid())
@@ -15,12 +13,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -43,8 +41,6 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ── Application models ────────────────────────────────────────────────────────
-
 model User {
   id                      String              @id @default(cuid())
   name                    String?
@@ -55,10 +51,10 @@ model User {
   verificationToken       String?             @unique
   verificationTokenExpiry DateTime?
   accounts                Account[]
-  sessions                Session[]
-  patients                Patient[]
   assessmentSessions      AssessmentSession[]
+  patients                Patient[]
   scales                  Scale[]
+  sessions                Session[]
 }
 
 model Scale {
@@ -68,39 +64,39 @@ model Scale {
   psychologistId     String?
   isLibrary          Boolean             @default(false)
   createdAt          DateTime            @default(now())
+  assessmentSessions AssessmentSession[]
   psychologist       User?               @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
   items              ScaleItem[]
   thresholds         SeverityThreshold[]
-  assessmentSessions AssessmentSession[]
 }
 
 model ScaleItem {
   id       String           @id @default(cuid())
   scaleId  String
-  scale    Scale            @relation(fields: [scaleId], references: [id], onDelete: Cascade)
   order    Int
   text     String
   type     ItemType
   required Boolean          @default(true)
   options  ResponseOption[]
+  scale    Scale            @relation(fields: [scaleId], references: [id], onDelete: Cascade)
 }
 
 model ResponseOption {
   id     String    @id @default(cuid())
   itemId String
-  item   ScaleItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
   label  String
   value  Int?
   order  Int
+  item   ScaleItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 }
 
 model SeverityThreshold {
   id       String @id @default(cuid())
   scaleId  String
-  scale    Scale  @relation(fields: [scaleId], references: [id], onDelete: Cascade)
   label    String
   minScore Int
   maxScore Int
+  scale    Scale  @relation(fields: [scaleId], references: [id], onDelete: Cascade)
 }
 
 model Patient {
@@ -108,9 +104,9 @@ model Patient {
   displayName        String
   anonymousId        String
   psychologistId     String
-  psychologist       User                @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
-  assessmentSessions AssessmentSession[]
   createdAt          DateTime            @default(now())
+  assessmentSessions AssessmentSession[]
+  psychologist       User                @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
 
   @@unique([anonymousId, psychologistId])
 }
@@ -118,26 +114,26 @@ model Patient {
 model AssessmentSession {
   id             String                 @id @default(cuid())
   patientId      String
-  patient        Patient                @relation(fields: [patientId], references: [id], onDelete: Cascade)
   psychologistId String
-  psychologist   User                   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
   scaleId        String
-  scale          Scale             @relation(fields: [scaleId], references: [id])
   status         SessionStatus          @default(PENDING)
   token          String                 @unique
   tokenExpiresAt DateTime
-  response       QuestionnaireResponse?
   createdAt      DateTime               @default(now())
+  patient        Patient                @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologist   User                   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  scale          Scale                  @relation(fields: [scaleId], references: [id])
+  response       QuestionnaireResponse?
 }
 
 model QuestionnaireResponse {
   id          String            @id @default(cuid())
   sessionId   String            @unique
-  session     AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   itemScores  Json
   totalScore  Int
   severity    String
   completedAt DateTime          @default(now())
+  session     AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 enum ItemType {

@@ -6,8 +6,8 @@ import { z } from 'zod'
 
 const AddThresholdSchema = z.object({
   label: z.string().min(1),
-  minScore: z.number(),
-  maxScore: z.number(),
+  minScore: z.number().int().min(0),
+  maxScore: z.number().int().min(0),
 })
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -26,5 +26,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const threshold = await prisma.severityThreshold.create({
     data: { ...parsed.data, scaleId: params.id },
   })
+
   return NextResponse.json(threshold, { status: 201 })
 }

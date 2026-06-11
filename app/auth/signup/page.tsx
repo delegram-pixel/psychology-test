@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -39,7 +40,8 @@ export default function SignupPage() {
       setServerError(json.error)
       return
     }
-    router.push('/auth/signin?registered=1')
+    await signIn('credentials', { email: data.email, password: data.password, redirect: false })
+    router.push('/dashboard')
   }
 
   return (

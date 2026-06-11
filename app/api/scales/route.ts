@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { z } from 'zod'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 }
 
 const CreateScaleSchema = z.object({
-  name: z.string().min(2),
+  name: z.string().min(1),
   description: z.string().optional(),
 })
 

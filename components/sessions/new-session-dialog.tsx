@@ -11,8 +11,8 @@ import { Plus, Copy, Check } from 'lucide-react'
 interface Scale {
   id: string
   name: string
+  description: string | null
   isLibrary: boolean
-  _count?: { items: number }
 }
 
 export function NewSessionDialog({ patientId }: { patientId: string }) {
@@ -49,6 +49,12 @@ export function NewSessionDialog({ patientId }: { patientId: string }) {
     router.refresh()
   }
 
+  function onCopy() {
+    navigator.clipboard.writeText(fillUrl!)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   function onClose() {
     setOpen(false)
     setFillUrl(null)
@@ -56,11 +62,8 @@ export function NewSessionDialog({ patientId }: { patientId: string }) {
     setError(null)
   }
 
-  function onCopy() {
-    navigator.clipboard.writeText(fillUrl!)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+  const libraryScales = scales.filter(s => s.isLibrary)
+  const myScales = scales.filter(s => !s.isLibrary)
 
   return (
     <Dialog open={open} onOpenChange={val => { if (!val) onClose(); else setOpen(true) }}>
@@ -97,18 +100,18 @@ export function NewSessionDialog({ patientId }: { patientId: string }) {
                   {scales.length === 0 && (
                     <SelectItem value="_loading" disabled>Loading…</SelectItem>
                   )}
-                  {scales.filter(s => s.isLibrary).length > 0 && (
+                  {libraryScales.length > 0 && (
                     <>
                       <div className="px-2 py-1 text-xs text-slate-400 font-medium uppercase tracking-wide">Library</div>
-                      {scales.filter(s => s.isLibrary).map(s => (
+                      {libraryScales.map(s => (
                         <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                       ))}
                     </>
                   )}
-                  {scales.filter(s => !s.isLibrary).length > 0 && (
+                  {myScales.length > 0 && (
                     <>
                       <div className="px-2 py-1 text-xs text-slate-400 font-medium uppercase tracking-wide">Custom</div>
-                      {scales.filter(s => !s.isLibrary).map(s => (
+                      {myScales.map(s => (
                         <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                       ))}
                     </>
