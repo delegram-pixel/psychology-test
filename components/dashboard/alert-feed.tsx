@@ -5,8 +5,10 @@ import { computeAlerts } from '@/lib/alert-rules'
 interface SessionWithPatient {
   id: string
   scale: string
+  scaleName: string
   patientId: string
   patient: { anonymousId: string }
+  storedSeverity?: string | null
   response: { totalScore: number; itemScores: Record<string, number> } | null
 }
 
@@ -21,7 +23,7 @@ export function AlertFeed({ sessions }: { sessions: SessionWithPatient[] }) {
     .filter(s => s.response)
     .map(s => {
       const itemScores = s.response!.itemScores as Record<string, number>
-      const result = computeAlerts(s.scale as 'PHQ9' | 'BDI2' | 'GAD7', s.response!.totalScore, itemScores)
+      const result = computeAlerts(s.scale, s.response!.totalScore, itemScores, s.storedSeverity ?? undefined)
       return { session: s, ...result }
     })
     .filter(a => a.severity !== null)
@@ -53,7 +55,7 @@ export function AlertFeed({ sessions }: { sessions: SessionWithPatient[] }) {
                 {severity === 'critical' ? 'Critical' : severity === 'high' ? 'High' : 'Moderate'}
               </span>
               <span className="text-sm font-medium text-slate-700">{session.patient.anonymousId}</span>
-              <span className="text-sm text-slate-500">{session.scale} · Score {session.response?.totalScore}</span>
+              <span className="text-sm text-slate-500">{session.scaleName} · Score {session.response?.totalScore}</span>
               {suicidalIdeation && (
                 <span className="flex items-center gap-1 text-xs text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded-full">
                   <AlertTriangle size={12} /> Suicidal ideation endorsed

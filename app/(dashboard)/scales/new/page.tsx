@@ -79,6 +79,7 @@ export default function NewScalePage() {
   async function finish() {
     setSaving(true)
     setError(null)
+    let scale: { id: string } | null = null
     try {
       // 1. Create scale
       const scaleRes = await fetch('/api/scales', {
@@ -87,15 +88,16 @@ export default function NewScalePage() {
         body: JSON.stringify({ name, description }),
       })
       if (!scaleRes.ok) throw new Error('Failed to create scale')
-      const scale = await scaleRes.json()
+      scale = await scaleRes.json()
 
-      // 2. Add items
-      for (const item of items) {
-        const body: Record<string, unknown> = { text: item.text, type: item.type }
+      // 2. Add items (parallel, each needs `order`)
+      await Promise.all(items.map(async (item, i) => {
+        const body: Record<string, unknown> = { text: item.text, type: item.type, order: i + 1 }
         if (item.type === 'MULTIPLE_CHOICE' && item.options.length) {
-          body.options = item.options.map(o => ({
+          body.options = item.options.map((o, oi) => ({
             label: o.label,
             value: o.value !== '' ? Number(o.value) : undefined,
+            order: oi,
           }))
         }
         const r = await fetch(`/api/scales/${scale.id}/items`, {
@@ -104,7 +106,7 @@ export default function NewScalePage() {
           body: JSON.stringify(body),
         })
         if (!r.ok) throw new Error('Failed to save item')
-      }
+      }))
 
       // 3. Add thresholds
       for (const th of thresholds) {
@@ -123,6 +125,11 @@ export default function NewScalePage() {
 
       router.push('/scales')
     } catch (e: unknown) {
+      // Clean up the scale shell if it was created but items/thresholds failed
+      if (scale) {
+        await fetch(`/api/scales/${scale.id}`, { method: 'DELETE' }).catch(() => {})
+        scale = null
+      }
       setError(e instanceof Error ? e.message : 'Something went wrong')
       setSaving(false)
     }

@@ -35,6 +35,10 @@ export default function SigninPage() {
       password: data.password,
       redirect: false,
     })
+    if (result?.error === 'EMAIL_NOT_VERIFIED') {
+      setError('Please verify your email address before signing in. Check your inbox.')
+      return
+    }
     if (result?.error) {
       setError('Invalid email or password.')
       return

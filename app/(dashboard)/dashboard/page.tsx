@@ -32,11 +32,21 @@ export default async function DashboardPage() {
   const completedSessions = allSessions.filter(s => s.status === 'COMPLETED' && s.response)
   const pendingSessions = allSessions.filter(s => s.status === 'PENDING').length
 
+  const alertFeedSessions = completedSessions.map(s => ({
+    id: s.id,
+    patientId: s.patientId,
+    patient: s.patient,
+    scale: SCALE_NAME_TO_ENUM[s.scale.name] ?? s.scale.name,
+    scaleName: s.scale.name,
+    response: s.response,
+    storedSeverity: s.response?.severity,
+  }))
+
   const alertCounts = completedSessions.reduce(
     (acc, s) => {
       const itemScores = s.response!.itemScores as Record<string, number>
-      const scaleEnum = (SCALE_NAME_TO_ENUM[s.scale.name] ?? s.scale.name) as 'PHQ9' | 'BDI2' | 'GAD7'
-      const { severity } = computeAlerts(scaleEnum, s.response!.totalScore, itemScores)
+      const scaleEnum = SCALE_NAME_TO_ENUM[s.scale.name] ?? s.scale.name
+      const { severity } = computeAlerts(scaleEnum, s.response!.totalScore, itemScores, s.response!.severity)
       if (severity === 'critical') acc.critical++
       if (severity) acc.open++
       return acc
@@ -60,7 +70,7 @@ export default async function DashboardPage() {
         }}
       />
 
-      <AlertFeed sessions={completedSessions as any} />
+      <AlertFeed sessions={alertFeedSessions} />
 
       <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">

@@ -7,10 +7,27 @@ interface Props {
   data: { session: number; score: number }[]
 }
 
-const THRESHOLDS: Record<string, number> = { PHQ9: 20, BDI2: 29, GAD7: 15 }
+const SEVERITY_LINES: Record<string, { label: string; y: number; color: string }[]> = {
+  PHQ9: [
+    { label: 'Moderate', y: 10, color: '#F59E0B' },
+    { label: 'High',     y: 15, color: '#F97316' },
+    { label: 'Critical', y: 20, color: '#EF4444' },
+  ],
+  BDI2: [
+    { label: 'Moderate', y: 14, color: '#F59E0B' },
+    { label: 'High',     y: 20, color: '#F97316' },
+    { label: 'Critical', y: 29, color: '#EF4444' },
+  ],
+  GAD7: [
+    { label: 'Moderate', y:  5, color: '#F59E0B' },
+    { label: 'High',     y: 10, color: '#F97316' },
+    { label: 'Critical', y: 15, color: '#EF4444' },
+  ],
+}
 
 export function SessionChart({ scale, data }: Props) {
-  const threshold = THRESHOLDS[scale]
+  const lines = SEVERITY_LINES[scale] ?? []
+
   const trend = data.length >= 2
     ? data.at(-1)!.score > data.at(0)!.score ? 'worsening'
     : data.at(-1)!.score < data.at(0)!.score ? 'improving'
@@ -26,14 +43,15 @@ export function SessionChart({ scale, data }: Props) {
         <XAxis dataKey="session" tick={{ fontSize: 12 }} tickFormatter={(v: number) => `Session ${v}`} />
         <YAxis tick={{ fontSize: 12 }} />
         <Tooltip formatter={(v: number) => [`Score: ${v}`, '']} />
-        {threshold && (
+        {lines.map(({ label, y, color }) => (
           <ReferenceLine
-            y={threshold}
-            stroke="#EF4444"
+            key={label}
+            y={y}
+            stroke={color}
             strokeDasharray="4 4"
-            label={{ value: 'Critical', fontSize: 11, fill: '#EF4444' }}
+            label={{ value: label, fontSize: 11, fill: color }}
           />
-        )}
+        ))}
         <Line type="monotone" dataKey="score" stroke={lineColor} strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
       </LineChart>
     </ResponsiveContainer>

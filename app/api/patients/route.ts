@@ -35,17 +35,18 @@ export async function POST(req: NextRequest) {
   const parsed = CreatePatientSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
 
-  const count = await prisma.patient.count({
-    where: { psychologistId: session.user.id },
-  })
-
-  const patient = await prisma.patient.create({
-    data: {
-      displayName: parsed.data.displayName,
-      anonymousId: nextAnonymousId(count),
-      psychologistId: session.user.id,
-    },
-  })
+  const patient = await prisma.$transaction(async (tx) => {
+    const count = await tx.patient.count({
+      where: { psychologistId: session.user.id },
+    })
+    return tx.patient.create({
+      data: {
+        displayName: parsed.data.displayName,
+        anonymousId: nextAnonymousId(count),
+        psychologistId: session.user.id,
+      },
+    })
+  }, { isolationLevel: 'Serializable' })
 
   return NextResponse.json(patient, { status: 201 })
 }

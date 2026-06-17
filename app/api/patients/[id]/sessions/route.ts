@@ -53,7 +53,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const sessions = await prisma.assessmentSession.findMany({
     where: { patientId: params.id, psychologistId: session.user.id },
     include: { response: true },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: 'asc' },
   })
 
   return NextResponse.json(sessions)

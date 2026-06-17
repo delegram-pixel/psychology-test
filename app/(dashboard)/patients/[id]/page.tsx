@@ -7,6 +7,7 @@ import { SessionChart } from '@/components/sessions/session-chart'
 import { NewSessionDialog } from '@/components/sessions/new-session-dialog'
 import { CopyLinkButton } from '@/components/sessions/copy-link-button'
 import { computeAlerts } from '@/lib/alert-rules'
+import { PatientActions } from '@/components/patients/patient-actions'
 
 export default async function PatientProfilePage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
@@ -31,16 +32,22 @@ export default async function PatientProfilePage({ params }: { params: { id: str
   const completed = patient.assessmentSessions.filter(s => s.response)
   const latest = completed.at(-1)
 
-  const chartData = completed.map((s, i) => ({
+  // Only plot sessions for the same scale as the latest session so scores are comparable
+  const latestScaleId = latest?.scaleId
+  const chartSessions = latestScaleId
+    ? completed.filter(s => s.scaleId === latestScaleId)
+    : completed
+  const chartData = chartSessions.map((s, i) => ({
     session: i + 1,
     score: s.response!.totalScore,
   }))
 
   const latestAlerts = latest?.response
     ? computeAlerts(
-        (SCALE_NAME_TO_ENUM[latest.scale.name] ?? latest.scale.name) as 'PHQ9' | 'BDI2' | 'GAD7',
+        SCALE_NAME_TO_ENUM[latest.scale.name] ?? latest.scale.name,
         latest.response.totalScore,
-        latest.response.itemScores as Record<string, number>
+        latest.response.itemScores as Record<string, number>,
+        latest.response.severity
       )
     : null
 
@@ -50,10 +57,13 @@ export default async function PatientProfilePage({ params }: { params: { id: str
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold text-slate-900">{patient.anonymousId}</h1>
-            <span className="text-sm text-slate-400">{patient.displayName}</span>
+            {patient.displayName && (
+              <span className="text-sm text-slate-400">{patient.displayName}</span>
+            )}
             {latestAlerts?.severity === 'critical' && (
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">Critical</span>
             )}
+            <PatientActions patientId={patient.id} currentDisplayName={patient.displayName ?? patient.anonymousId} />
           </div>
           <p className="text-slate-500 text-sm mt-1">
             {completed.length} completed session{completed.length !== 1 ? 's' : ''}

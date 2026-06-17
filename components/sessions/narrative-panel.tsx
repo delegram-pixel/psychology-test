@@ -14,14 +14,37 @@ interface Props {
     itemScores: Record<string, number>
     suicidalIdeation: boolean
   }
+  sessionId: string
+  patientId: string
+  initialReviewed?: boolean
+  initialEscalated?: boolean
 }
 
-export function NarrativePanel({ clinicalPayload }: Props) {
+export function NarrativePanel({
+  clinicalPayload,
+  sessionId,
+  patientId,
+  initialReviewed = false,
+  initialEscalated = false,
+}: Props) {
   const [narrative, setNarrative] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [reviewed, setReviewed] = useState(false)
-  const [escalated, setEscalated] = useState(false)
+  const [reviewed, setReviewed] = useState(initialReviewed)
+  const [escalated, setEscalated] = useState(initialEscalated)
+  const [actionLoading, setActionLoading] = useState<'reviewed' | 'escalated' | null>(null)
+
+  async function recordAction(action: 'reviewed' | 'escalated') {
+    setActionLoading(action)
+    await fetch(`/api/patients/${patientId}/sessions/${sessionId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action }),
+    })
+    if (action === 'reviewed') setReviewed(true)
+    else setEscalated(true)
+    setActionLoading(null)
+  }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -41,11 +64,7 @@ Write a clinical summary of 4–5 sentences: (1) overall severity with reference
     fetch('/api/narrative', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 600,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+      body: JSON.stringify({ prompt }),
     })
       .then(r => r.json())
       .then(data => {
@@ -78,18 +97,24 @@ Write a clinical summary of 4–5 sentences: (1) overall severity with reference
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setReviewed(true)}
+          onClick={() => !reviewed && recordAction('reviewed')}
+          disabled={reviewed || actionLoading === 'reviewed'}
           className={reviewed ? 'border-green-400 text-green-600' : ''}
         >
-          {reviewed ? <><CheckCircle size={14} className="mr-1" /> Reviewed</> : 'Mark Reviewed'}
+          {reviewed
+            ? <><CheckCircle size={14} className="mr-1" /> Reviewed</>
+            : actionLoading === 'reviewed' ? 'Saving…' : 'Mark Reviewed'}
         </Button>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setEscalated(true)}
+          onClick={() => !escalated && recordAction('escalated')}
+          disabled={escalated || actionLoading === 'escalated'}
           className={escalated ? 'border-orange-400 text-orange-600' : ''}
         >
-          {escalated ? <><AlertTriangle size={14} className="mr-1" /> Escalated</> : 'Escalate to Supervisor'}
+          {escalated
+            ? <><AlertTriangle size={14} className="mr-1" /> Escalated</>
+            : actionLoading === 'escalated' ? 'Saving…' : 'Escalate to Supervisor'}
         </Button>
       </div>
     </div>

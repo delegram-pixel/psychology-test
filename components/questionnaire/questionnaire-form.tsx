@@ -38,19 +38,20 @@ const GAD7_ITEMS = [
   { number: 7, text: 'Feeling afraid as if something awful might happen', type: 'MULTIPLE_CHOICE', options: SCALE_OPTIONS },
 ]
 
-const BDI2_OPTIONS = [
-  { label: '0 — No sadness', value: 0 },
-  { label: '1 — I feel sad much of the time', value: 1 },
-  { label: '2 — I am sad all the time', value: 2 },
-  { label: '3 — I am so sad or unhappy that I cannot stand it', value: 3 },
+const BDI2_DOMAIN_OPTIONS = [
+  { label: '0', value: 0 },
+  { label: '1', value: 1 },
+  { label: '2', value: 2 },
+  { label: '3', value: 3 },
 ]
 
-const BDI2_ITEMS = Array.from({ length: 21 }, (_, i) => ({
-  number: i + 1,
-  text: `BDI-II Item ${i + 1}`,
-  type: 'MULTIPLE_CHOICE',
-  options: BDI2_OPTIONS,
-}))
+const BDI2_ITEMS = [
+  'Sadness', 'Pessimism', 'Past Failure', 'Loss of Pleasure', 'Guilty Feelings',
+  'Punishment Feelings', 'Self-Dislike', 'Self-Criticalness', 'Suicidal Thoughts or Wishes',
+  'Crying', 'Agitation', 'Loss of Interest', 'Indecisiveness', 'Worthlessness',
+  'Loss of Energy', 'Changes in Sleeping Pattern', 'Irritability', 'Changes in Appetite',
+  'Concentration Difficulty', 'Tiredness or Fatigue', 'Loss of Interest in Sex',
+].map((text, i) => ({ number: i + 1, text, type: 'MULTIPLE_CHOICE', options: BDI2_DOMAIN_OPTIONS }))
 
 const HARDCODED_ITEMS: Record<string, typeof PHQ9_ITEMS> = {
   PHQ9: PHQ9_ITEMS,
@@ -84,12 +85,13 @@ interface Props {
   scale: string
   scaleName: string
   token: string
+  description?: string | null
   dbItems?: DbItem[]
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
+export function QuestionnaireForm({ scale, scaleName, token, description, dbItems }: Props) {
   const router = useRouter()
   const [answers, setAnswers] = useState<Record<number, number | string>>({})
   const [submitting, setSubmitting] = useState(false)
@@ -141,9 +143,13 @@ export function QuestionnaireForm({ scale, scaleName, token, dbItems }: Props) {
     <div className="max-w-2xl mx-auto py-10 px-4 space-y-8">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Over the last 2 weeks, how often have you been bothered by the following?
-        </p>
+        {description ? (
+          <p className="text-slate-500 text-sm mt-1">{description}</p>
+        ) : (scale === 'PHQ9' || scale === 'GAD7') && (
+          <p className="text-slate-500 text-sm mt-1">
+            Over the last 2 weeks, how often have you been bothered by the following?
+          </p>
+        )}
       </div>
 
       {items.length === 0 && (

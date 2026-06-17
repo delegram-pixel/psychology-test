@@ -127,13 +127,15 @@ model AssessmentSession {
 }
 
 model QuestionnaireResponse {
-  id          String            @id @default(cuid())
-  sessionId   String            @unique
-  itemScores  Json
-  totalScore  Int
-  severity    String
-  completedAt DateTime          @default(now())
-  session     AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  id           String            @id @default(cuid())
+  sessionId    String            @unique
+  itemScores   Json
+  totalScore   Int
+  severity     String
+  completedAt  DateTime          @default(now())
+  reviewedAt   DateTime?
+  escalatedAt  DateTime?
+  session      AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 enum ItemType {

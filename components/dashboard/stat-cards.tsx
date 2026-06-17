@@ -18,15 +18,15 @@ export function StatCards({ stats }: { stats: Stats }) {
     },
     { label: 'Awaiting Response', value: stats.pendingSessions, icon: Clock, color: 'text-amber-500' },
     {
-      label: 'Avg Caseload Risk',
-      value: stats.criticalAlerts > 0 ? 'High' : 'Moderate',
+      label: 'Highest Alert Level',
+      value: stats.criticalAlerts > 0 ? 'Critical' : stats.openAlerts > 0 ? 'High/Moderate' : 'None',
       icon: Activity,
-      color: 'text-orange-500',
+      color: stats.criticalAlerts > 0 ? 'text-red-500' : stats.openAlerts > 0 ? 'text-orange-500' : 'text-green-500',
     },
   ]
 
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map(card => (
         <div key={card.label} className="bg-white border border-slate-200 rounded-lg p-5">
           <div className="flex items-center justify-between mb-2">

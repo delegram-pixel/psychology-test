@@ -46,6 +46,7 @@ export default async function FillPage({ params }: { params: { token: string } }
         scale={scaleKey}
         scaleName={session.scale.name}
         token={params.token}
+        description={session.scale.description}
         dbItems={session.scale.items}
       />
     </div>

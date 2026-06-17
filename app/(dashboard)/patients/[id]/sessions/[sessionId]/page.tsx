@@ -29,11 +29,12 @@ export default async function SessionDetailPage({
   if (!assessmentSession || !assessmentSession.response) notFound()
 
   const itemScores = assessmentSession.response.itemScores as Record<string, number>
-  const scaleEnum = (SCALE_NAME_TO_ENUM[assessmentSession.scale.name] ?? assessmentSession.scale.name) as 'PHQ9' | 'BDI2' | 'GAD7'
+  const scaleEnum = SCALE_NAME_TO_ENUM[assessmentSession.scale.name] ?? assessmentSession.scale.name
   const alerts = computeAlerts(
     scaleEnum,
     assessmentSession.response.totalScore,
-    itemScores
+    itemScores,
+    assessmentSession.response.severity
   )
 
   const clinicalPayload = {
@@ -43,6 +44,9 @@ export default async function SessionDetailPage({
     itemScores,
     suicidalIdeation: alerts.suicidalIdeation,
   }
+
+  const initialReviewed  = !!assessmentSession.response.reviewedAt
+  const initialEscalated = !!assessmentSession.response.escalatedAt
 
   const severityStyle = alerts.severity === 'critical'
     ? 'bg-red-100 text-red-700'
@@ -98,7 +102,13 @@ export default async function SessionDetailPage({
         </table>
       </div>
 
-      <NarrativePanel clinicalPayload={clinicalPayload} />
+      <NarrativePanel
+        clinicalPayload={clinicalPayload}
+        sessionId={assessmentSession.id}
+        patientId={params.id}
+        initialReviewed={initialReviewed}
+        initialEscalated={initialEscalated}
+      />
 
       <p className="text-xs text-slate-400 italic">
         AI-generated clinical summary. For clinician review and decision support only.

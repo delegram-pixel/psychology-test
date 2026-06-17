@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { Plus, Lock } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import { ScaleCard } from '@/components/scales/scale-card'
 
 export default async function ScalesPage() {
   const session = await getServerSession(authOptions)
@@ -44,18 +45,7 @@ export default async function ScalesPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {libraryScales.map(scale => (
-            <div key={scale.id} className="bg-white border border-slate-200 rounded-lg p-4 space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="font-medium text-slate-800 text-sm">{scale.name}</p>
-                  {scale.description && (
-                    <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{scale.description}</p>
-                  )}
-                </div>
-                <Lock size={12} className="text-slate-300 mt-0.5 flex-shrink-0" />
-              </div>
-              <p className="text-xs text-slate-400">{scale._count.items} items</p>
-            </div>
+            <ScaleCard key={scale.id} scale={scale} />
           ))}
         </div>
       </section>
@@ -72,17 +62,7 @@ export default async function ScalesPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {myScales.map(scale => (
-              <Link
-                key={scale.id}
-                href={`/scales/${scale.id}`}
-                className="block bg-white border border-slate-200 rounded-lg p-4 space-y-2 hover:border-indigo-300 transition-colors"
-              >
-                <p className="font-medium text-slate-800 text-sm">{scale.name}</p>
-                {scale.description && (
-                  <p className="text-xs text-slate-500 line-clamp-2">{scale.description}</p>
-                )}
-                <p className="text-xs text-slate-400">{scale._count.items} items</p>
-              </Link>
+              <ScaleCard key={scale.id} scale={scale} />
             ))}
           </div>
         )}
