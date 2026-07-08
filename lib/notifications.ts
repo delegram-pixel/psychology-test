@@ -1,5 +1,6 @@
 import { NotificationType, type Notification } from "@prisma/client"
 import prisma from "@/lib/prisma"
+import { isNotificationEnabled } from "@/lib/notification-preferences"
 import { computeAlerts } from "@/lib/alert-rules"
 import { scaleNameToEnum } from "@/lib/patient-summary"
 import { isTokenExpired } from "@/lib/token"
@@ -166,7 +167,11 @@ export function sortNotifications(items: Notification[]): Notification[] {
 
 export async function createNotification(
   data: CreateNotificationInput,
-): Promise<Notification> {
+): Promise<Notification | null> {
+  if (!(await isNotificationEnabled(data.userId, data.type))) {
+    return null
+  }
+
   return prisma.notification.upsert({
     where: {
       userId_dedupeKey: {

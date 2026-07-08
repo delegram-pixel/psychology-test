@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import { LogOut, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -30,7 +31,7 @@ export function DashboardNavbarActions() {
 
       <HeaderMenu
         label="Account menu"
-        panelClassName="w-56 p-2"
+        panelClassName="w-56 p-2 max-md:w-auto"
         trigger={
           <Button
             type="button"
@@ -58,10 +59,12 @@ export function DashboardNavbarActions() {
           type="button"
           variant="ghost"
           className="w-full justify-start gap-2"
-          disabled
+          asChild
         >
-          <Settings className="size-4" />
-          Settings
+          <Link href="/settings">
+            <Settings className="size-4" />
+            Settings
+          </Link>
         </Button>
         <Button
           type="button"
