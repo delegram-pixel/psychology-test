@@ -18,7 +18,8 @@ export function NotificationBell() {
   return (
     <HeaderMenu
       label="Notifications"
-      panelClassName="w-80 overflow-hidden"
+      fullWidthMobile
+      panelClassName="w-80 overflow-hidden max-md:w-auto"
       trigger={
         <Button
           type="button"

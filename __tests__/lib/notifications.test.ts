@@ -15,6 +15,9 @@ jest.mock("@/lib/prisma", () => ({
       updateMany: jest.fn(),
       deleteMany: jest.fn(),
     },
+    notificationPreference: {
+      findUnique: jest.fn(),
+    },
     assessmentSession: {
       findMany: jest.fn(),
       update: jest.fn(),
@@ -62,6 +65,7 @@ describe("buildSessionSubmitNotifications", () => {
 describe("createNotification dedupe", () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockPrisma.notificationPreference.findUnique.mockResolvedValue(null)
     mockPrisma.notification.upsert.mockResolvedValue({
       id: "n1",
       userId: "user-1",
@@ -104,6 +108,7 @@ describe("createNotification dedupe", () => {
 describe("createLoginNotification", () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockPrisma.notificationPreference.findUnique.mockResolvedValue(null)
     mockPrisma.notification.upsert.mockResolvedValue({
       id: "n1",
       userId: "user-1",
@@ -143,6 +148,7 @@ describe("createLoginNotification", () => {
 describe("reconcileOperationalNotifications", () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockPrisma.notificationPreference.findUnique.mockResolvedValue(null)
     mockPrisma.notification.upsert.mockResolvedValue({} as never)
     mockPrisma.assessmentSession.update.mockResolvedValue({} as never)
   })

@@ -9,6 +9,7 @@ const TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/patients": "Patients",
   "/scales": "Scales",
+  "/settings": "Settings",
 }
 
 function getPageTitle(pathname: string): string {
